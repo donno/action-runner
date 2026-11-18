@@ -48,7 +48,11 @@ if [[ "$CURRENT_PLATFORM" == 'windows' ]]; then
         RUNTIME_ID='win-arm64'
     fi
 elif [[ "$CURRENT_PLATFORM" == 'linux' ]]; then
-    RUNTIME_ID="linux-x64"
+    if (ldd --version 2>&1 || true) | grep -q musl; then
+        RUNTIME_ID="linux-musl-x64"
+    else
+        RUNTIME_ID="linux-x64"
+    fi
     if command -v uname > /dev/null; then
         CPU_NAME=$(uname -m)
         case $CPU_NAME in
@@ -83,7 +87,7 @@ if [[ "$CURRENT_PLATFORM" == 'windows' ]]; then
         exit 1
     fi
 elif [[ "$CURRENT_PLATFORM" == 'linux' ]]; then
-    if [[ ("$RUNTIME_ID" != 'linux-x64') && ("$RUNTIME_ID" != 'linux-x86') && ("$RUNTIME_ID" != 'linux-arm64') ]]; then
+    if [[ ("$RUNTIME_ID" != 'linux-x64') && ("$RUNTIME_ID" != 'linux-musl-x64') && ("$RUNTIME_ID" != 'linux-x86') && ("$RUNTIME_ID" != 'linux-arm64') ]]; then
        echo "Failed: Can't build $RUNTIME_ID package $CURRENT_PLATFORM" >&2
        exit 1
     fi
